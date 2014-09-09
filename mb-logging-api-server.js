@@ -1,11 +1,13 @@
 var express = require('express')
     , mongoose = require('mongoose')
-    , User = require('./lib/log')
+    , UserImport = require('./lib/userimport')
     , dslogger = require('./lib/dslogger')
     ;
 
-// Initialize the logging mechanism. Defines filename to write to and whether
-// or not to also log to the console.
+/**
+ * Initialize the logging mechanism. Defines filename to write to and whether
+ * or not to also log to the console.
+ */
 dslogger.init('mb-logging-api-server', false);
 
 /**
@@ -49,7 +51,9 @@ app.configure(function() {
   app.use(express.errorHandler({dumpException: true, showStack: true}));
 });
 
-// Start server
+/**
+ * Start server.
+ */
 var port = overridePort || process.env.MB_LOGGING_API_PORT || defaultPort;
 app.listen(port, function() {
   console.log('Message Broker Logging API server listening on port %d in %s mode.', port, app.settings.env);
@@ -65,27 +69,31 @@ mongoose.connection.on('error', function(err) {
   process.exit();
 });
 
-var loggingModel;
-var loggingCollectionName = 'import-user-niche';
+var userImportModel;
+var userImportCollectionName = 'userimport-niche';
 mongoose.connection.once('open', function() {
 
-  // User schema
+  // User import logging schema for existing entries
   var userImportLoggingSchema = new mongoose.Schema({
-    logging_date : Date,
-    media : {
-      type : String,
-      required : true,
-      enum : ['email', 'phone', 'other', 'undefined'],
-      default : 'undefined'
+    logged_date : { type: Date, default: Date.now },
+    phone : {
+      number : { type : String, trim : true },
+      status : { type : String, trim : true }
     },
-    address : String,
-    status : String,
-    acquired : Date
+    email : {
+      address : { type : String, trim : true },
+      status : { type : String, trim : true },
+      acquired : { type: Date, default: Date.now }
+    },
+    drupal : {
+      email : { type : String, trim : true },
+      uid : { type : Number }
+    }
   });
   userImportLoggingSchema.set('autoIndex', false);
 
   // Logging model
-  loggingModel = mongoose.model(loggingCollectionName, userImportLoggingSchema);
+  userImportModel = mongoose.model(userImportCollectionName, userImportLoggingSchema);
 
   console.log("Connection to Mongo (%s) succeeded! Ready to go...\n\n", mongoUri);
 });
@@ -95,14 +103,15 @@ mongoose.connection.once('open', function() {
  */
 
 /**
- * POST to /log
+ * POST to /api/userimport/existing
  */
-app.post('/log', function(req, res) {
-  if (req.body.media === undefined || req.body.address === undefined || req.body.status === undefined) {
-    res.send(400, 'No media, address or status specified.');
+app.post('/api/userimport/existing', function(req, res) {
+  if (req.body.email === undefined && req.body.phone === undefined & req.body.drupal_uid === undefined) {
+    res.send(400, 'No email, phone or Drupal uid specified.');
+    dslogger.error('POST /userimport request. No email, phone or Drupal uid specified.');
   }
   else {
-    var log = new Log(loggingModel);
-    log.post(req, res);
+    var userImport = new UserImport(userImportModel);
+    userImport.post(req, res);
   }
 });
