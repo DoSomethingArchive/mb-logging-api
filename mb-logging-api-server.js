@@ -1,6 +1,7 @@
 var express = require('express')
     , mongoose = require('mongoose')
-    , UserImport = require('./lib/userimport')
+    , UserImport = require('./lib/user-import-niche')
+    , UserImportSummary = require('./lib/user-import-summary')
     , dslogger = require('./lib/dslogger')
     ;
 
@@ -18,7 +19,7 @@ dslogger.init('mb-logging-api-server', false);
  */
 var listenForPort = false;
 var overridePort = false;
-var defaultPort = 4722;
+var defaultPort = 4766;
 
 process.argv.forEach(function(val, idx, arr) {
   if (listenForPort) {
@@ -71,6 +72,8 @@ mongoose.connection.on('error', function(err) {
 
 var userImportModel;
 var userImportCollectionName = 'userimport-niche';
+var userImportSummaryModel;
+var userImportSummaryCollectionName = 'userimport-summary';
 mongoose.connection.once('open', function() {
 
   // User import logging schema for existing entries
@@ -91,9 +94,19 @@ mongoose.connection.once('open', function() {
     }
   });
   userImportLoggingSchema.set('autoIndex', false);
-
   // Logging model
   userImportModel = mongoose.model(userImportCollectionName, userImportLoggingSchema);
+
+  // User import logging schema for summary reports
+  var userImportSummarySchema = new mongoose.Schema({
+    logged_date : { type: Date, default: Date.now },
+    target_CSV_file : { type : String, trim : true },
+    signup_count : { type : Number },
+    skipped : { type : Number }
+  });
+  userImportSummarySchema.set('autoIndex', false);
+  // Logging summary model
+  userImportSummaryModel = mongoose.model(userImportSummaryCollectionName, userImportSummarySchema);
 
   console.log("Connection to Mongo (%s) succeeded! Ready to go...\n\n", mongoUri);
 });
@@ -105,13 +118,27 @@ mongoose.connection.once('open', function() {
 /**
  * POST to /api/userimport/existing
  */
-app.post('/api/userimport/existing', function(req, res) {
-  if (req.body.email === undefined && req.body.phone === undefined & req.body.drupal_uid === undefined) {
+app.post('/api/userimport/existing/niche', function(req, res) {
+  if (req.body.email === undefined && req.body.phone === undefined && req.body.drupal_uid === undefined) {
     res.send(400, 'No email, phone or Drupal uid specified.');
-    dslogger.error('POST /userimport request. No email, phone or Drupal uid specified.');
+    dslogger.error('POST /api/userimport/existing/niche request. No email, phone or Drupal uid specified.');
   }
   else {
     var userImport = new UserImport(userImportModel);
     userImport.post(req, res);
+  }
+});
+
+/**
+ * POST to /api/userimport/existing
+ */
+app.post('/api/userimport/niche/summary', function(req, res) {
+  if (req.body.target_CSV_file === undefined || req.body.signup_count === undefined || req.body.skipped === undefined) {
+    res.send(400, 'No target CSV file, signup count and skipped values specified.');
+    dslogger.error('POST /api/userimport/niche/summary request. No target CSV file, signup count and skipped values specified.');
+  }
+  else {
+    var userImportSummary = new UserImportSummary(userImportSummaryModel);
+    userImportSummary.post(req, res);
   }
 });
