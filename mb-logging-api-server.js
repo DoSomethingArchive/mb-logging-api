@@ -72,13 +72,20 @@ mongoose.connection.on('error', function(err) {
 
 var userImportModel;
 var userImportCollectionName = 'userimport-niche';
-var userImportSummaryModel;
-var userImportSummaryCollectionName = 'userimport-summary';
+var importSummaryModel;
+var importSummaryCollectionName = 'import-summary';
+
 mongoose.connection.once('open', function() {
 
   // User import logging schema for existing entries
   var userImportLoggingSchema = new mongoose.Schema({
     logged_date : { type: Date, default: Date.now },
+    source : {
+      type : String,
+      lowercase : 1,
+      trim : true,
+      enum: ['niche.com']
+    },
     phone : {
       number : { type : String, trim : true },
       status : { type : String, trim : true }
@@ -98,7 +105,7 @@ mongoose.connection.once('open', function() {
   userImportModel = mongoose.model(userImportCollectionName, userImportLoggingSchema);
 
   // User import logging schema for summary reports
-  var userImportSummarySchema = new mongoose.Schema({
+  var importSummarySchema = new mongoose.Schema({
     logged_date : { type: Date, default: Date.now },
     target_CSV_file : { type : String, trim : true },
     signup_count : { type : Number },
@@ -109,10 +116,16 @@ mongoose.connection.once('open', function() {
       trim : true,
       enum: ['niche.com']
     },
+    log_type : {
+      type : String,
+      lowercase : 1,
+      trim : true,
+      enum: ['user_import']
+    },
   });
-  userImportSummarySchema.set('autoIndex', false);
+  importSummarySchema.set('autoIndex', false);
   // Logging summary model
-  userImportSummaryModel = mongoose.model(userImportSummaryCollectionName, userImportSummarySchema);
+  importSummaryModel = mongoose.model(importSummaryCollectionName, importSummarySchema);
 
   console.log("Connection to Mongo (%s) succeeded! Ready to go...\n\n", mongoUri);
 });
@@ -173,7 +186,7 @@ app.post('/api/v1/imports/summaries', function(req, res) {
     dslogger.error('POST /api/v1/imports/summaries request. Type or source not specified or no target CSV file, signup count and skipped values specified.');
   }
   else {
-    var userImportSummary = new UserImportSummary(userImportSummaryModel);
+    var userImportSummary = new UserImportSummary(importSummaryModel);
     userImportSummary.post(req, res);
   }
 });
