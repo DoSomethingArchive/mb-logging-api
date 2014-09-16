@@ -127,6 +127,20 @@ app.get('/api/v1', function(req, res) {
 });
 
 /**
+ * GET from /users
+ */
+app.get('/api/v1/imports', function(req, res) {
+  if (req.body.type == 'user' && req.body.exists == 1) {
+    var userImport = new UserImport(userImportModel);
+    userImport.get(req, res);
+  }
+  else {
+    res.send(400, 'type or exists setting specified not supported at this time.');
+    dslogger.error('GET /api/v1/imports request. type or exists setting specified not supported at this time.');
+  }
+});
+
+/**
  * POST to /api/userimport/existing
  */
 app.post('/api/v1/userimport/existing/niche', function(req, res) {
