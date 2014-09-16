@@ -102,7 +102,13 @@ mongoose.connection.once('open', function() {
     logged_date : { type: Date, default: Date.now },
     target_CSV_file : { type : String, trim : true },
     signup_count : { type : Number },
-    skipped : { type : Number }
+    skipped : { type : Number },
+    source : {
+      type : String,
+      lowercase : 1,
+      trim : true,
+      enum: ['niche.com']
+    },
   });
   userImportSummarySchema.set('autoIndex', false);
   // Logging summary model
