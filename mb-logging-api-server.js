@@ -118,7 +118,7 @@ mongoose.connection.once('open', function() {
 /**
  * POST to /api/userimport/existing
  */
-app.post('/api/userimport/existing/niche', function(req, res) {
+app.post('/api/v1/userimport/existing/niche', function(req, res) {
   if (req.body.email === undefined && req.body.phone === undefined && req.body.drupal_uid === undefined) {
     res.send(400, 'No email, phone or Drupal uid specified.');
     dslogger.error('POST /api/userimport/existing/niche request. No email, phone or Drupal uid specified.');
@@ -132,7 +132,7 @@ app.post('/api/userimport/existing/niche', function(req, res) {
 /**
  * POST to /api/userimport/existing
  */
-app.post('/api/userimport/niche/summary', function(req, res) {
+app.post('/api/v1/userimport/niche/summary', function(req, res) {
   if (req.body.target_CSV_file === undefined || req.body.signup_count === undefined || req.body.skipped === undefined) {
     res.send(400, 'No target CSV file, signup count and skipped values specified.');
     dslogger.error('POST /api/userimport/niche/summary request. No target CSV file, signup count and skipped values specified.');
