@@ -116,6 +116,13 @@ mongoose.connection.once('open', function() {
  */
 
 /**
+ * GET to /api - report basic details about the API
+ */
+app.get('/api', function(req, res) {
+  res.send(200, 'Message Broker Logging API (mb-logging-api) version 1.x.x. https://github.com/DoSomething/mb-logging-api');
+});
+
+/**
  * POST to /api/userimport/existing
  */
 app.post('/api/userimport/existing/niche', function(req, res) {
