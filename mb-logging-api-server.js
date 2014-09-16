@@ -116,10 +116,14 @@ mongoose.connection.once('open', function() {
  */
 
 /**
- * GET to /api - report basic details about the API
+ * GET /api - report basic details about the API
+ * GET /api/v1
  */
 app.get('/api', function(req, res) {
-  res.send(200, 'Message Broker Logging API (mb-logging-api) version 1.x.x. https://github.com/DoSomething/mb-logging-api');
+  res.send(200, 'Message Broker Logging API (mb-logging-api). Available versions: v1 (/api/v1) See https://github.com/DoSomething/mb-logging-api for the related git repository.');
+});
+app.get('/api/v1', function(req, res) {
+  res.send(200, 'Message Broker Logging API (mb-logging-api). Version 1.x.x, see wiki () for documentation');
 });
 
 /**
