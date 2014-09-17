@@ -37,19 +37,47 @@ process.argv.forEach(function(val, idx, arr) {
  */
 var app = express();
 
-app.configure(function() {
-  // Replaces express.bodyParser() - parses request body and populates request.body
-  app.use(express.urlencoded());
-  app.use(express.json());
+// Replaces express.bodyParser() - parses request body and populates request.body
+app.use(express.urlencoded());
+app.use(express.json());
 
-  // Checks request.body for HTTP method override
-  app.use(express.methodOverride());
+// Checks request.body for HTTP method override
+app.use(express.methodOverride());
 
-  // Perform route lookup based on url and HTTP method
-  app.use(app.router);
+// Perform route lookup based on url and HTTP method
+app.use(app.router);
 
-  // Show all errors in development
+/// catch 404 and forwarding to error handler
+app.use(function(req, res, next) {
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
+});
+
+/// error handlers
+
+// development error handler
+// will print stacktrace
+if (app.get('env') === 'development') {
+  app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+      message: err.message,
+      error: err
+    });
+  });
+  // Show all errors in development with express
   app.use(express.errorHandler({dumpException: true, showStack: true}));
+}
+
+// production error handler
+// no stacktraces leaked to user
+app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+        message: err.message,
+        error: {}
+    });
 });
 
 /**
@@ -72,13 +100,20 @@ mongoose.connection.on('error', function(err) {
 
 var userImportModel;
 var userImportCollectionName = 'userimport-niche';
-var userImportSummaryModel;
-var userImportSummaryCollectionName = 'userimport-summary';
+var importSummaryModel;
+var importSummaryCollectionName = 'import-summary';
+
 mongoose.connection.once('open', function() {
 
   // User import logging schema for existing entries
   var userImportLoggingSchema = new mongoose.Schema({
     logged_date : { type: Date, default: Date.now },
+    source : {
+      type : String,
+      lowercase : 1,
+      trim : true,
+      enum: ['niche.com']
+    },
     phone : {
       number : { type : String, trim : true },
       status : { type : String, trim : true }
@@ -98,15 +133,27 @@ mongoose.connection.once('open', function() {
   userImportModel = mongoose.model(userImportCollectionName, userImportLoggingSchema);
 
   // User import logging schema for summary reports
-  var userImportSummarySchema = new mongoose.Schema({
+  var importSummarySchema = new mongoose.Schema({
     logged_date : { type: Date, default: Date.now },
     target_CSV_file : { type : String, trim : true },
     signup_count : { type : Number },
-    skipped : { type : Number }
+    skipped : { type : Number },
+    source : {
+      type : String,
+      lowercase : 1,
+      trim : true,
+      enum: ['niche.com']
+    },
+    log_type : {
+      type : String,
+      lowercase : 1,
+      trim : true,
+      enum: ['user_import']
+    },
   });
-  userImportSummarySchema.set('autoIndex', false);
+  importSummarySchema.set('autoIndex', false);
   // Logging summary model
-  userImportSummaryModel = mongoose.model(userImportSummaryCollectionName, userImportSummarySchema);
+  importSummaryModel = mongoose.model(importSummaryCollectionName, importSummarySchema);
 
   console.log("Connection to Mongo (%s) succeeded! Ready to go...\n\n", mongoUri);
 });
@@ -130,18 +177,21 @@ app.get('/api/v1', function(req, res) {
  * POST to /api/v1/imports
  *
  * @param type string
- *
+ *   ex. &type=user : The type of import, helps to define what collection the
+ *   POST is added to.
  *
  * @param exists integer
- *
+ *   &exists=1 : Flag to log entries of existing Drupal, Mailchimp and Mobile
+ *   Commons users
  *
  * @param source string
- *
+ *   &source=niche : Unique name to identify the source of the import data.
  */
 app.post('/api/v1/imports', function(req, res) {
-  if (req.body.email === undefined && req.body.phone === undefined && req.body.drupal_uid === undefined) {
-    res.send(400, 'No email, phone or Drupal uid specified.');
-    dslogger.error('POST /api/imports request. No email, phone or Drupal uid specified.');
+  if (req.body.type === undefined || req.body.exists === undefined || req.body.source === undefined ||
+      (req.body.email === undefined && req.body.phone === undefined && req.body.drupal_uid === undefined)) {
+    res.send(400, 'Type, exists and source not specified or no email, phone or Drupal uid specified.');
+    dslogger.error('POST /api/v1/imports request. No type, exists and source not specified or no email, phone or Drupal uid specified.');
   }
   else {
     var userImport = new UserImport(userImportModel);
@@ -150,15 +200,21 @@ app.post('/api/v1/imports', function(req, res) {
 });
 
 /**
- * POST to /api/userimport/existing
+ * POST to /api/v1/imports/summaries
+ * @param type string
+ *   ex. &type=user : The type of import.
+ *
+ * @param source string
+ *   &source=niche : Unique name to identify the source of the import data.
  */
-app.post('/api/v1/imports/summary', function(req, res) {
-  if (req.body.target_CSV_file === undefined || req.body.signup_count === undefined || req.body.skipped === undefined) {
-    res.send(400, 'No target CSV file, signup count and skipped values specified.');
-    dslogger.error('POST /api/userimport/niche/summary request. No target CSV file, signup count and skipped values specified.');
+app.post('/api/v1/imports/summaries', function(req, res) {
+  if (req.body.type === undefined || req.body.source === undefined ||
+      req.body.target_CSV_file === undefined || req.body.signup_count === undefined || req.body.skipped === undefined) {
+    res.send(400, 'Type or source not specified or no target CSV file, signup count and skipped values specified.');
+    dslogger.error('POST /api/v1/imports/summaries request. Type or source not specified or no target CSV file, signup count and skipped values specified.');
   }
   else {
-    var userImportSummary = new UserImportSummary(userImportSummaryModel);
+    var userImportSummary = new UserImportSummary(importSummaryModel);
     userImportSummary.post(req, res);
   }
 });
