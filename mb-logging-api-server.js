@@ -37,19 +37,47 @@ process.argv.forEach(function(val, idx, arr) {
  */
 var app = express();
 
-app.configure(function() {
-  // Replaces express.bodyParser() - parses request body and populates request.body
-  app.use(express.urlencoded());
-  app.use(express.json());
+// Replaces express.bodyParser() - parses request body and populates request.body
+app.use(express.urlencoded());
+app.use(express.json());
 
-  // Checks request.body for HTTP method override
-  app.use(express.methodOverride());
+// Checks request.body for HTTP method override
+app.use(express.methodOverride());
 
-  // Perform route lookup based on url and HTTP method
-  app.use(app.router);
+// Perform route lookup based on url and HTTP method
+app.use(app.router);
 
-  // Show all errors in development
+/// catch 404 and forwarding to error handler
+app.use(function(req, res, next) {
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
+});
+
+/// error handlers
+
+// development error handler
+// will print stacktrace
+if (app.get('env') === 'development') {
+  app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+      message: err.message,
+      error: err
+    });
+  });
+  // Show all errors in development with express
   app.use(express.errorHandler({dumpException: true, showStack: true}));
+}
+
+// production error handler
+// no stacktraces leaked to user
+app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+        message: err.message,
+        error: {}
+    });
 });
 
 /**
