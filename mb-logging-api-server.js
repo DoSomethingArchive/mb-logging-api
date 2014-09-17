@@ -127,26 +127,21 @@ app.get('/api/v1', function(req, res) {
 });
 
 /**
- * GET from /users
+ * POST to /api/v1/imports
+ *
+ * @param type string
+ *
+ *
+ * @param exists integer
+ *
+ *
+ * @param source string
+ *
  */
-app.get('/api/v1/imports', function(req, res) {
-  if (req.body.type == 'user' && req.body.exists == 1) {
-    var userImport = new UserImport(userImportModel);
-    userImport.get(req, res);
-  }
-  else {
-    res.send(400, 'type or exists setting specified not supported at this time.');
-    dslogger.error('GET /api/v1/imports request. type or exists setting specified not supported at this time.');
-  }
-});
-
-/**
- * POST to /api/userimport/existing
- */
-app.post('/api/v1/userimport/existing/niche', function(req, res) {
+app.post('/api/v1/imports', function(req, res) {
   if (req.body.email === undefined && req.body.phone === undefined && req.body.drupal_uid === undefined) {
     res.send(400, 'No email, phone or Drupal uid specified.');
-    dslogger.error('POST /api/userimport/existing/niche request. No email, phone or Drupal uid specified.');
+    dslogger.error('POST /api/imports request. No email, phone or Drupal uid specified.');
   }
   else {
     var userImport = new UserImport(userImportModel);
@@ -157,7 +152,7 @@ app.post('/api/v1/userimport/existing/niche', function(req, res) {
 /**
  * POST to /api/userimport/existing
  */
-app.post('/api/v1/userimport/niche/summary', function(req, res) {
+app.post('/api/v1/imports/summary', function(req, res) {
   if (req.body.target_CSV_file === undefined || req.body.signup_count === undefined || req.body.skipped === undefined) {
     res.send(400, 'No target CSV file, signup count and skipped values specified.');
     dslogger.error('POST /api/userimport/niche/summary request. No target CSV file, signup count and skipped values specified.');
@@ -165,5 +160,19 @@ app.post('/api/v1/userimport/niche/summary', function(req, res) {
   else {
     var userImportSummary = new UserImportSummary(userImportSummaryModel);
     userImportSummary.post(req, res);
+  }
+});
+
+/**
+ * GET from /api/v1/imports/:start_timestamp/:end_timestamp
+ */
+app.get('/api/v1/imports/summary/:start_date/:end_date', function(req, res) {
+  if (req.query.type == 'user' && req.query.exists == 1) {
+    var userImportSummary = new UserImportSummary(userImportSummaryModel);
+    userImportSummary.get(req, res);
+  }
+  else {
+    res.send(400, 'type or exists setting specified not supported at this time.');
+    dslogger.error('GET /api/v1/imports request. type or exists setting specified not supported at this time.');
   }
 });
