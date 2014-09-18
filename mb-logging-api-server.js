@@ -208,13 +208,21 @@ app.post('/api/v1/imports', function(req, res) {
  * GET from /api/v1/imports/:start_timestamp/:end_timestamp
  */
 app.get('/api/v1/imports/:start_date/:end_date', function(req, res) {
-  if (req.query.type == 'user_import' && req.query.exists == 1 && req.query.source !== undefined) {
-    var userImport = new UserImport(userImportModel);
-    userImport.get(req, res);
+  var sd = new Date(req.param("start_date"));
+  var ed = new Date(req.param("end_date"));
+  if (sd != 'Invalid Date' && ed != 'Invalid Date') {
+    if (req.query.type == 'user_import' && req.query.exists == 1 && req.query.source !== undefined) {
+      var userImport = new UserImport(userImportModel);
+      userImport.get(req, res);
+    }
+    else {
+      res.send(400, 'type or exists setting specified not supported at this time.');
+      dslogger.error('GET /api/v1/imports request. type or exists setting specified not supported at this time.');
+    }
   }
   else {
-    res.send(400, 'type or exists setting specified not supported at this time.');
-    dslogger.error('GET /api/v1/imports request. type or exists setting specified not supported at this time.');
+    res.send(400, 'Validation error: /api/v1/imports/:start_date/:end_date -> Invalid start or end dates.');
+    dslogger.error('GET /api/v1/imports/:start_date/:end_date request. Invalid start or end dates.');
   }
 });
 
@@ -257,7 +265,7 @@ app.get('/api/v1/imports/summaries/:start_date/:end_date', function(req, res) {
     }
   }
   else {
-    res.send(400, 'Invalid start or end dates.');
+    res.send(400, 'Validation error: /api/v1/imports/summaries/:start_date/:end_date -> Invalid start or end dates.');
     dslogger.error('GET /api/v1/imports/summaries/:start_date/:end_date request. Invalid start or end dates.');
   }
 });
