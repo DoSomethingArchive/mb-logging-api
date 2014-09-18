@@ -61,11 +61,13 @@ app.use(function(req, res, next) {
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
     res.status(err.status || 500);
-    // res.send(201, addArgs);
+    res.send(500, err.status);
+    /*
     res.render('error', {
       message: err.message,
       error: err
     });
+    */
   });
   // Show all errors in development with express
   app.use(express.errorHandler({dumpException: true, showStack: true}));
@@ -241,12 +243,21 @@ app.post('/api/v1/imports/summaries', function(req, res) {
  * GET from /api/v1/imports/summaries/:start_timestamp/:end_timestamp
  */
 app.get('/api/v1/imports/summaries/:start_date/:end_date', function(req, res) {
-  if (req.query.type == 'user_import' && req.query.exists == 1) {
-    var userImportSummary = new UserImportSummary(importSummaryModel);
-    userImportSummary.get(req, res);
+  var sd = new Date(req.param("start_date"));
+  var ed = new Date(req.param("end_date"));
+  if (sd != 'Invalid Date' && ed != 'Invalid Date') {
+    if (req.query.type == 'user_import' && req.query.exists == 1) {
+      console.log(req.param("start_date"));
+      var userImportSummary = new UserImportSummary(importSummaryModel);
+      userImportSummary.get(req, res);
+    }
+    else {
+      res.send(400, 'type or exists setting specified not supported at this time.');
+      dslogger.error('GET /api/v1/imports/summaries/:start_date/:end_date request. type or exists setting specified not supported at this time.');
+    }
   }
   else {
-    res.send(400, 'type or exists setting specified not supported at this time.');
-    dslogger.error('GET /api/v1/imports request. type or exists setting specified not supported at this time.');
+    res.send(400, 'Invalid start or end dates.');
+    dslogger.error('GET /api/v1/imports/summaries/:start_date/:end_date request. Invalid start or end dates.');
   }
 });
