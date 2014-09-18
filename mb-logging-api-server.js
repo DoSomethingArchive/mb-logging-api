@@ -1,6 +1,6 @@
 var express = require('express')
     , mongoose = require('mongoose')
-    , UserImport = require('./lib/user-import-niche')
+    , UserImport = require('./lib/user-import')
     , UserImportSummary = require('./lib/user-import-summary')
     , dslogger = require('./lib/dslogger')
     ;
@@ -203,6 +203,20 @@ app.post('/api/v1/imports', function(req, res) {
 });
 
 /**
+ * GET from /api/v1/imports/:start_timestamp/:end_timestamp
+ */
+app.get('/api/v1/imports/:start_date/:end_date', function(req, res) {
+  if (req.query.type == 'user_import' && req.query.exists == 1 && req.query.source !== undefined) {
+    var userImport = new UserImport(userImportModel);
+    userImport.get(req, res);
+  }
+  else {
+    res.send(400, 'type or exists setting specified not supported at this time.');
+    dslogger.error('GET /api/v1/imports request. type or exists setting specified not supported at this time.');
+  }
+});
+
+/**
  * POST to /api/v1/imports/summaries
  *
  * @param type string
@@ -224,7 +238,7 @@ app.post('/api/v1/imports/summaries', function(req, res) {
 });
 
 /**
- * GET from /api/v1/imports/:start_timestamp/:end_timestamp
+ * GET from /api/v1/imports/summaries/:start_timestamp/:end_timestamp
  */
 app.get('/api/v1/imports/summaries/:start_date/:end_date', function(req, res) {
   if (req.query.type == 'user_import' && req.query.exists == 1) {
