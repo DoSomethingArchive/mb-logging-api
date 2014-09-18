@@ -1,6 +1,6 @@
 var express = require('express')
     , mongoose = require('mongoose')
-    , UserImport = require('./lib/user-import-niche')
+    , UserImport = require('./lib/user-import')
     , UserImportSummary = require('./lib/user-import-summary')
     , dslogger = require('./lib/dslogger')
     ;
@@ -61,10 +61,13 @@ app.use(function(req, res, next) {
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
     res.status(err.status || 500);
+    res.send(500, err.status);
+    /*
     res.render('error', {
       message: err.message,
       error: err
     });
+    */
   });
   // Show all errors in development with express
   app.use(express.errorHandler({dumpException: true, showStack: true}));
@@ -182,33 +185,58 @@ app.get('/api/v1', function(req, res) {
  *
  * @param exists integer
  *   &exists=1 : Flag to log entries of existing Drupal, Mailchimp and Mobile
- *   Commons users
+ *   Commons users in the userImportModel.
  *
  * @param source string
  *   &source=niche : Unique name to identify the source of the import data.
  */
 app.post('/api/v1/imports', function(req, res) {
-  if (req.body.type === undefined || req.body.exists === undefined || req.body.source === undefined ||
+  if (req.query.type === undefined || req.query.exists === undefined || req.query.source === undefined ||
       (req.body.email === undefined && req.body.phone === undefined && req.body.drupal_uid === undefined)) {
     res.send(400, 'Type, exists and source not specified or no email, phone or Drupal uid specified.');
     dslogger.error('POST /api/v1/imports request. No type, exists and source not specified or no email, phone or Drupal uid specified.');
   }
   else {
+    // @todo: Future use of parameter to change the model based on exists
+    // flag value.
     var userImport = new UserImport(userImportModel);
     userImport.post(req, res);
   }
 });
 
 /**
+ * GET from /api/v1/imports/:start_timestamp/:end_timestamp
+ */
+app.get('/api/v1/imports/:start_date/:end_date', function(req, res) {
+  var sd = new Date(req.param("start_date"));
+  var ed = new Date(req.param("end_date"));
+  if (sd != 'Invalid Date' && ed != 'Invalid Date') {
+    if (req.query.type == 'user_import' && req.query.exists == 1 && req.query.source !== undefined) {
+      var userImport = new UserImport(userImportModel);
+      userImport.get(req, res);
+    }
+    else {
+      res.send(400, 'type or exists setting specified not supported at this time.');
+      dslogger.error('GET /api/v1/imports request. type or exists setting specified not supported at this time.');
+    }
+  }
+  else {
+    res.send(400, 'Validation error: /api/v1/imports/:start_date/:end_date -> Invalid start or end dates.');
+    dslogger.error('GET /api/v1/imports/:start_date/:end_date request. Invalid start or end dates.');
+  }
+});
+
+/**
  * POST to /api/v1/imports/summaries
+ *
  * @param type string
  *   ex. &type=user : The type of import.
  *
  * @param source string
- *   &source=niche : Unique name to identify the source of the import data.
+ *   &source=niche.com : Unique name to identify the source of the import data.
  */
 app.post('/api/v1/imports/summaries', function(req, res) {
-  if (req.body.type === undefined || req.body.source === undefined ||
+  if (req.query.type === undefined || req.query.source === undefined ||
       req.body.target_CSV_file === undefined || req.body.signup_count === undefined || req.body.skipped === undefined) {
     res.send(400, 'Type or source not specified or no target CSV file, signup count and skipped values specified.');
     dslogger.error('POST /api/v1/imports/summaries request. Type or source not specified or no target CSV file, signup count and skipped values specified.');
@@ -216,5 +244,28 @@ app.post('/api/v1/imports/summaries', function(req, res) {
   else {
     var userImportSummary = new UserImportSummary(importSummaryModel);
     userImportSummary.post(req, res);
+  }
+});
+
+/**
+ * GET from /api/v1/imports/summaries/:start_timestamp/:end_timestamp
+ */
+app.get('/api/v1/imports/summaries/:start_date/:end_date', function(req, res) {
+  var sd = new Date(req.param("start_date"));
+  var ed = new Date(req.param("end_date"));
+  if (sd != 'Invalid Date' && ed != 'Invalid Date') {
+    if (req.query.type == 'user_import' && req.query.exists == 1) {
+      console.log(req.param("start_date"));
+      var userImportSummary = new UserImportSummary(importSummaryModel);
+      userImportSummary.get(req, res);
+    }
+    else {
+      res.send(400, 'type or exists setting specified not supported at this time.');
+      dslogger.error('GET /api/v1/imports/summaries/:start_date/:end_date request. type or exists setting specified not supported at this time.');
+    }
+  }
+  else {
+    res.send(400, 'Validation error: /api/v1/imports/summaries/:start_date/:end_date -> Invalid start or end dates.');
+    dslogger.error('GET /api/v1/imports/summaries/:start_date/:end_date request. Invalid start or end dates.');
   }
 });
