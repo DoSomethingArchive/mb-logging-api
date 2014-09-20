@@ -124,7 +124,7 @@ mongoose.connection.once('open', function() {
     email : {
       address : { type : String, trim : true },
       status : { type : String, trim : true },
-      acquired : { type: Date, default: Date.now }
+      acquired : { type: Date }
     },
     drupal : {
       email : { type : String, trim : true },
