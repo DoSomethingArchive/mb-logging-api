@@ -119,7 +119,8 @@ mongoose.connection.once('open', function() {
     },
     phone : {
       number : { type : String, trim : true },
-      status : { type : String, trim : true }
+      status : { type : String, trim : true },
+      acquired : { type: Date }
     },
     email : {
       address : { type : String, trim : true },
