@@ -110,7 +110,7 @@ mongoose.connection.once('open', function() {
 
   // User import logging schema for existing entries
   var userImportLoggingSchema = new mongoose.Schema({
-    logged_date : { type: Date, default: Date.now },
+    logged_date : { type: Date },
     source : {
       type : String,
       lowercase : 1,
@@ -124,7 +124,7 @@ mongoose.connection.once('open', function() {
     email : {
       address : { type : String, trim : true },
       status : { type : String, trim : true },
-      acquired : { type: Date, default: Date.now }
+      acquired : { type: Date }
     },
     drupal : {
       email : { type : String, trim : true },
