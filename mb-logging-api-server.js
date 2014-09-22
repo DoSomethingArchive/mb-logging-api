@@ -19,7 +19,7 @@ dslogger.init('mb-logging-api-server', false);
  */
 var listenForPort = false;
 var overridePort = false;
-var defaultPort = 4766;
+var defaultPort = 4733;
 
 process.argv.forEach(function(val, idx, arr) {
   if (listenForPort) {
