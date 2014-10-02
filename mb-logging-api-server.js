@@ -263,7 +263,6 @@ app.get('/api/v1/imports/summaries/:start_date/:end_date', function(req, res) {
   var ed = new Date(req.param("end_date"));
   if (sd != 'Invalid Date' && ed != 'Invalid Date') {
     if (req.query.type == 'user_import' && req.query.exists == 1) {
-      console.log(req.param("start_date"));
       var userImportSummary = new UserImportSummary(importSummaryModel);
       userImportSummary.get(req, res);
     }
