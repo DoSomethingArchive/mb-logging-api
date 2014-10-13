@@ -149,6 +149,18 @@ mongoose.connection.once('open', function() {
     target_CSV_file : { type : String, trim : true },
     signup_count : { type : Number },
     skipped : { type : Number },
+    existing : {
+      mailchimp : { type : Number },
+      drupal : { type : Number },
+      mobile_commons : {
+        undeliverable : { type : Number },
+        existing : { type : Number },
+        no_subscription : { type : Number },
+        other : { type : Number },
+        total : { type : Number }
+      },
+      total : { type : Number }
+    },
     source : {
       type : String,
       lowercase : 1,
