@@ -2,6 +2,7 @@ var express = require('express')
     , mongoose = require('mongoose')
     , UserImport = require('./lib/user-import')
     , UserImportSummary = require('./lib/user-import-summary')
+    , UserImportSummaryExisting = require('./lib/user-import-summary-existing')
     , dslogger = require('./lib/dslogger')
     ;
 
@@ -264,6 +265,29 @@ app.post('/api/v1/imports/summaries', function(req, res) {
   else {
     var userImportSummary = new UserImportSummary(importSummaryModel);
     userImportSummary.post(req, res);
+  }
+});
+
+/**
+ * POST to /api/v1/imports/summaries/existing
+ *
+ * @param type string
+ *   ex. &type=user : The type of import.
+ *
+ * @param source string
+ *   &source=niche.com : Unique name to identify the source of the import data.
+ *
+ * @param target_CSV_file string
+ *   &target_CSV_file=2014-09-10.csv
+ */
+app.post('/api/v1/imports/summaries/existing', function(req, res) {
+  if (req.query.type === undefined || req.query.source === undefined || req.body.target_CSV_file === undefined) {
+    res.send(400, 'Type, source or target_CSV_file not specified.');
+    dslogger.error('POST /api/v1/imports/summaries/existing request. Type, source or target_CSV_file not specified.');
+  }
+  else {
+    var userImportSummaryExisting = new UserImportSummaryExisting(importSummaryModel);
+    userImportSummaryExisting.post(req, res);
   }
 });
 
