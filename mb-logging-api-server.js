@@ -281,7 +281,7 @@ app.post('/api/v1/imports/summaries', function(req, res) {
  *   &target_CSV_file=2014-09-10.csv
  */
 app.post('/api/v1/imports/summaries/existing', function(req, res) {
-  if (req.query.type === undefined || req.query.source === undefined || req.body.target_CSV_file === undefined) {
+  if (req.query.type === undefined || req.query.source === undefined || req.query.target_CSV_file === undefined) {
     res.send(400, 'Type, source or target_CSV_file not specified.');
     dslogger.error('POST /api/v1/imports/summaries/existing request. Type, source or target_CSV_file not specified.');
   }
