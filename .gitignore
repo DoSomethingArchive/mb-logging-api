@@ -1,4 +1,9 @@
+# Ststtem files
+.DS_Store
+
+# Libraries
 node_modules/
 
 # Ignore dslogger logs
 dslogger/
+
