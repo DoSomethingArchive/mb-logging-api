@@ -1,4 +1,4 @@
-[https://david-dm.org/DoSomething/mb-logging-api.svg](https://david-dm.org/DoSomething/mb-logging-api.svg)
+![https://david-dm.org/DoSomething/mb-logging-api.svg](https://david-dm.org/DoSomething/mb-logging-api.svg)
 
 mb-logging-api
 ==============
@@ -9,7 +9,7 @@ An API to send logging data for persistant storage. Currently the persistant sto
 
 * GET /api - report basic details about the API
 * GET /api/v1
-* POST to /api/v1/imports
+* POST to /api/v1/imports?type=[user]&exists=[1]&source=[niche]
   * @param type string
     ex. &type=user : The type of import, helps to define what collection the
      POST is added to.
@@ -18,7 +18,7 @@ An API to send logging data for persistant storage. Currently the persistant sto
     Commons users in the userImportModel.
   * @param source string
     &source=niche : Unique name to identify the source of the import data.
-* POST to /api/v1/imports/summaries
+* POST to /api/v1/imports/summaries?type=[user]&source=[niche]
    * @param type string
      ex. &type=user : The type of import.
    * @param source string
