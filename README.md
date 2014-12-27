@@ -1,4 +1,4 @@
-https://david-dm.org/DoSomething/mb-logging-api.svg
+[https://david-dm.org/DoSomething/mb-logging-api.svg](https://david-dm.org/DoSomething/mb-logging-api.svg)
 
 mb-logging-api
 ==============
