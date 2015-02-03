@@ -122,7 +122,7 @@ mongoose.connection.once('open', function() {
       type : String,
       lowercase : 1,
       trim : true,
-      enum: ['niche']
+      enum: ['niche', 'niche.com', 'herCampus']
     },
     phone : {
       number : { type : String, trim : true },
@@ -153,7 +153,7 @@ mongoose.connection.once('open', function() {
       type : String,
       lowercase : 1,
       trim : true,
-      enum: ['niche', 'herCampus']
+      enum: ['niche', 'niche.com', 'herCampus']
     },
     log_type : {
       type : String,
