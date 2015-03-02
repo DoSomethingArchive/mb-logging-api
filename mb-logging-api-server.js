@@ -109,7 +109,8 @@ mongoose.connection.on('error', function(err) {
 });
 
 var userImportModel;
-var userImportCollectionName = 'userimport-niche';
+var userImportCollectionName_Niche = 'userimport-niche';
+var userImportCollectionName_HerCampus = 'userimport-hercampus';
 var importSummaryModel;
 var importSummaryCollectionName = 'import-summary';
 
@@ -122,7 +123,7 @@ mongoose.connection.once('open', function() {
       type : String,
       lowercase : 1,
       trim : true,
-      enum: ['niche', 'niche.com', 'herCampus']
+      enum: ['niche', 'niche.com', 'hercampus']
     },
     phone : {
       number : { type : String, trim : true },
@@ -141,7 +142,8 @@ mongoose.connection.once('open', function() {
   });
   userImportLoggingSchema.set('autoIndex', false);
   // Logging model
-  userImportModel = mongoose.model(userImportCollectionName, userImportLoggingSchema);
+  userImportModel_niche = mongoose.model(userImportCollectionName_Niche, userImportLoggingSchema);
+  userImportModel_hercampus = mongoose.model(userImportCollectionName_HerCampus, userImportLoggingSchema);
 
   // User import logging schema for summary reports
   var importSummarySchema = new mongoose.Schema({
@@ -153,7 +155,7 @@ mongoose.connection.once('open', function() {
       type : String,
       lowercase : 1,
       trim : true,
-      enum: ['niche', 'niche.com', 'herCampus']
+      enum: ['niche', 'niche.com', 'hercampus']
     },
     log_type : {
       type : String,
@@ -205,10 +207,19 @@ app.post('/api/v1/imports', function(req, res) {
     dslogger.error('POST /api/v1/imports request. No type, exists and source not specified or no email, phone or Drupal uid specified.');
   }
   else {
-    // @todo: Future use of parameter to change the model based on exists
-    // flag value.
-    var userImport = new UserImport(userImportModel);
-    userImport.post(req, res);
+
+    // Use model based on source
+    if (req.query.source === 'niche') {
+      var userImport = new UserImport(userImportModel_niche);
+      userImport.post(req, res);
+    }
+    else if (req.query.source === 'hercampus') {
+      var userImport = new UserImport(userImportModel_hercampus);
+      userImport.post(req, res);
+    }
+    else {
+      dslogger.error('POST /api/v1/imports request. Invalid source: ' + req.query.source);
+    }
   }
 });
 
