@@ -119,6 +119,10 @@ mongoose.connection.once('open', function() {
   // User import logging schema for existing entries
   var userImportLoggingSchema = new mongoose.Schema({
     logged_date : { type: Date, default: Date.now },
+    origin : {
+      name : { type : String, trim : true },
+      started : { type: Date }
+    },
     source : {
       type : String,
       lowercase : 1,
