@@ -205,9 +205,9 @@ app.get('/api/v1', function(req, res) {
  *   &source=niche : Unique name to identify the source of the import data.
  */
 app.post('/api/v1/imports', function(req, res) {
-  if (req.query.type === undefined || req.query.exists === undefined || req.query.source === undefined || req.query.origin === undefined || req.query.started === undefined ||
+  if (req.query.type === undefined || req.query.exists === undefined || req.query.source === undefined || req.query.origin === undefined || req.query.started_timestamp === undefined ||
       (req.body.email === undefined && req.body.phone === undefined && req.body.drupal_uid === undefined)) {
-    res.send(400, 'Type, exists and source not specified or no email, phone or Drupal uid specified.');
+    res.send(400, 'Type, exists and source, origin or started_timestamp not specified or no email, phone or Drupal uid specified.');
     dslogger.error('POST /api/v1/imports request. No type, exists and source not specified or no email, phone or Drupal uid specified.');
   }
   else {
