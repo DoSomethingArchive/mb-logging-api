@@ -121,7 +121,7 @@ mongoose.connection.once('open', function() {
     logged_date : { type: Date, default: Date.now },
     origin : {
       name : { type : String, trim : true },
-      started : { type: Date }
+      processed : { type: Date }
     },
     source : {
       type : String,
@@ -213,15 +213,16 @@ app.post('/api/v1/imports', function(req, res) {
   else {
 
     // Use model based on source
-    if (req.query.source === 'niche') {
+    if (req.query.source.toLowerCase() === 'niche') {
       var userImport = new UserImport(userImportModel_niche);
       userImport.post(req, res);
     }
-    else if (req.query.source === 'hercampus') {
+    else if (req.query.source.toLowerCase() === 'hercampus') {
       var userImport = new UserImport(userImportModel_hercampus);
       userImport.post(req, res);
     }
     else {
+      console.log('POST /api/v1/imports request. Invalid source: ' + req.query.source);
       dslogger.error('POST /api/v1/imports request. Invalid source: ' + req.query.source);
     }
   }
