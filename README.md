@@ -23,3 +23,7 @@ An API to send logging data for persistant storage. Currently the persistant sto
      ex. &type=user : The type of import.
    * @param source string
      &source=niche.com : Unique name to identify the source of the import data.
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/DoSomething/mb-logging-api/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
