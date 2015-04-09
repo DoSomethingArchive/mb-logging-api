@@ -127,7 +127,7 @@ mongoose.connection.once('open', function() {
       type : String,
       lowercase : 1,
       trim : true,
-      enum: ['niche', 'niche.com', 'hercampus']
+      enum: ['niche', 'niche.com', 'hercampus', 'att-ichannel']
     },
     phone : {
       number : { type : String, trim : true },
@@ -148,6 +148,7 @@ mongoose.connection.once('open', function() {
   // Logging model
   userImportModel_niche = mongoose.model(userImportCollectionName_Niche, userImportLoggingSchema);
   userImportModel_hercampus = mongoose.model(userImportCollectionName_HerCampus, userImportLoggingSchema);
+  userImportModel_att_ichannel = mongoose.model(userImportCollectionName_ATT_iChannel, userImportLoggingSchema);
 
   // User import logging schema for summary reports
   var importSummarySchema = new mongoose.Schema({
@@ -159,7 +160,7 @@ mongoose.connection.once('open', function() {
       type : String,
       lowercase : 1,
       trim : true,
-      enum: ['niche', 'niche.com', 'hercampus']
+      enum: ['niche', 'niche.com', 'hercampus', 'att-ichannel']
     },
     log_type : {
       type : String,
@@ -219,6 +220,10 @@ app.post('/api/v1/imports', function(req, res) {
     }
     else if (req.query.source.toLowerCase() === 'hercampus') {
       var userImport = new UserImport(userImportModel_hercampus);
+      userImport.post(req, res);
+    }
+    else if (req.query.source.toLowerCase() === 'att-ichannel') {
+      var userImport = new UserImport(userImportModel_att_ichannel);
       userImport.post(req, res);
     }
     else {
