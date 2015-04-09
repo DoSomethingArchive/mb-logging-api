@@ -111,6 +111,7 @@ mongoose.connection.on('error', function(err) {
 var userImportModel;
 var userImportCollectionName_Niche = 'userimport-niche';
 var userImportCollectionName_HerCampus = 'userimport-hercampus';
+var userImportCollectionName_ATT_iChannel = 'userimport-att-ichannel';
 var importSummaryModel;
 var importSummaryCollectionName = 'import-summary';
 
