@@ -1,11 +1,36 @@
 {
-    "name": "mb-logging-api",
-    "version": "0.1.3",
-    "description": "Logging API for Message Broker use.",
-    "dependencies": {
-        "express": "3.x",
-        "path": "~0.4.9",
-        "mongoose": "~3.8.8",
-        "request": "2.34.x"
+  "name": "mb-logging-api",
+  "version": "0.1.4",
+  "description": "Logging API for Message Broker use.",
+  "homepage" : "https://github.com/DoSomething/mb-logging-api",
+  "author": "Darren Lee <dlee@dosomething.org>",
+  "contributors": [
+    {
+      "name": "Darren 'Dee' Lee",
+      "email": "dlee@dosomething.org"
     }
+  ],
+  "main": "mb-logging-api-server.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DoSomething/mb-logging-api"
+  },
+  "bugs": {
+    "url": "https://github.com/DoSomething/mb-logging-api/issues"
+  },
+  "engines" : {
+    "node" : ">=0.10.28"
+  },
+  "keywords": [
+    "DoSomething.org",
+    "Message Broker",
+    "logging"
+  ],
+  "dependencies": {
+    "express": "3.x",
+    "path": "~0.4.9",
+    "mongoose": "~3.8.8",
+    "request": "2.34.x"
+  },
+  "license": "MIT"
 }
