@@ -129,7 +129,7 @@ mongoose.connection.once('open', function() {
       type : String,
       lowercase : 1,
       trim : true,
-      enum: ['niche', 'niche.com', 'hercampus', 'att-ichannel']
+      enum: ['niche', 'niche.com', 'hercampus', 'att-ichannel', 'teenlife']
     },
     phone : {
       number : { type : String, trim : true },
