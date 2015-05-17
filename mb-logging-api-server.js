@@ -3,8 +3,8 @@ var express = require('express')
     , UserImport = require('./lib/user-import')
     , UserImportSummary = require('./lib/user-import-summary')
     , dslogger = require('./lib/dslogger')
-    , mb_config = require('config/mb_config.json')
     ;
+var mb_config = require(__dirname + '/config/mb_config.json');
 
 /**
  * Initialize the logging mechanism. Defines filename to write to and whether
