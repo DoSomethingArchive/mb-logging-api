@@ -3,6 +3,7 @@ var express = require('express')
     , UserImport = require('./lib/user-import')
     , UserImportSummary = require('./lib/user-import-summary')
     , dslogger = require('./lib/dslogger')
+    , mb_config = require('config/mb_config.json')
     ;
 
 /**
@@ -101,7 +102,7 @@ app.listen(port, function() {
 /**
  * Mongo setup and config.
  */
-var mongoUri = 'mongodb://mongo-apps,mongo4-aws,mongo5-aws:27017/mb-logging/?replicaSet=rs1';
+var mongoUri = mb_config.mongo;
 mongoose.connect(mongoUri);
 mongoose.connection.on('error', function(err) {
   console.log('Unable to connect to the Mongo database (%s). Check to make sure the database is running.', mongoUri);
