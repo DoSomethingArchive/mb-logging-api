@@ -117,6 +117,9 @@ var userImportCollectionName_TeenLife = 'userimport-teenlife';
 var importSummaryModel;
 var importSummaryCollectionName = 'import-summary';
 
+var externalApplicationUserEventModel;
+var externalApplicationUserEventCollectionName = 'externalapplicationuserevent';
+
 mongoose.connection.once('open', function() {
 
   // User import logging schema for existing entries
@@ -176,6 +179,30 @@ mongoose.connection.once('open', function() {
   importSummarySchema.set('autoIndex', false);
   // Logging summary model
   importSummaryModel = mongoose.model(importSummaryCollectionName, importSummarySchema);
+
+  // External application user event logging schema for "in the future" email list generation
+  var externalApplicationUserEventSchema = new mongoose.Schema({
+    logged_date : { type: Date, default: Date.now },
+    email : { type : String, trim : true },
+    source : {
+      type : String,
+      lowercase : 0,
+      trim : true,
+      enum: ['CGG', 'AGG']
+    },
+    activity : {
+      type : String,
+      lowercase : 1,
+      trim : true,
+      enum: ['vote']
+    },
+    activity_date : { type: Date, default: Date.now },
+    activity_timestamp : { type : Number },
+    activity_details : { type : String }
+  });
+  externalApplicationUserEventSchema.set('autoIndex', false);
+  // Logging summary model
+  externalApplicationUserEventModel = mongoose.model(externalApplicationUserEventCollectionName, externalApplicationUserEventSchema);
 
   console.log("Connection to Mongo (%s) succeeded! Ready to go...\n\n", mongoUri);
 });
