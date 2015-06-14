@@ -2,6 +2,7 @@ var express = require('express')
     , mongoose = require('mongoose')
     , UserImport = require('./lib/user-import')
     , UserImportSummary = require('./lib/user-import-summary')
+    , UserVote = require('./lib/user-vote')
     , dslogger = require('./lib/dslogger')
     ;
 var mb_config = require(__dirname + '/config/mb_config.json');
@@ -331,4 +332,12 @@ app.get('/api/v1/imports/summaries/:start_date/:end_date', function(req, res) {
     res.send(400, 'Validation error: /api/v1/imports/summaries/:start_date/:end_date -> Invalid start or end dates.');
     dslogger.error('GET /api/v1/imports/summaries/:start_date/:end_date request. Invalid start or end dates.');
   }
+});
+
+/**
+ * POST to /api/v1/user/vote
+ */
+app.post('/api/v1/user/vote', function(req, res) {
+  var userVote = new UserVote(externalApplicationUserEventModel);
+  userVote.post(req, res);
 });
