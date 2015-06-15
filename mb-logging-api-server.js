@@ -1,6 +1,7 @@
 var express    = require('express');
 var mongoose   = require('mongoose');
 var bodyParser = require('body-parser');
+var morgan     = require('morgan');
 
 var UserImport = require('./lib/user-import');
 var UserImportSummary = require('./lib/user-import-summary');
@@ -22,6 +23,13 @@ if (app.get('env') == 'development') {
   // To output objects for debugging
   // console.log("/ request: " + util.inspect(request, false, null));
   var util = require('util');
+  app.use(morgan('dev'));
+}
+else if (app.get('env') == 'production') {
+  app.use(morgan('common', {
+    skip: function(req, res) { return res.statusCode < 400 },
+    stream: __dirname + '/logs/morgan.log'
+  }));
 }
 
 // ROUTES API
@@ -116,9 +124,15 @@ router.post('/v1/imports/summaries', function(req, res) {
 /**
  * POST to /v1/user/vote
  */
-app.post('/v1/user/vote', function(req, res) {
-  var userVote = new UserVote(externalApplicationUserEventModel);
-  userVote.post(req, res);
+app.post('/v1/user/activity', function(req, res) {
+  if (req.body.activity == 'vote') {
+    var userVote = new UserVote(externalApplicationUserEventModel);
+    userVote.post(req, res);
+  }
+  else {
+    console.log("Unsupported activity: " + req.body.activity);
+  }
+
 });
 
 // REGISTER ROUTES
@@ -241,7 +255,6 @@ mongoose.connection.once('open', function() {
       enum: ['vote']
     },
     activity_date : { type: Date, default: Date.now },
-    activity_timestamp : { type : Number },
     activity_details : { type : String }
   });
   externalApplicationUserEventSchema.set('autoIndex', false);
