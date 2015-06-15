@@ -3,6 +3,7 @@ var mongoose   = require('mongoose');
 var bodyParser = require('body-parser');
 
 var UserImport = require('./lib/user-import');
+var UserImportSummary = require('./lib/user-import-summary')
 
 var mb_config = require(__dirname + '/config/mb_config.json');
 var defaultPort = mb_config.default['port'];
@@ -27,11 +28,7 @@ if (app.get('env') == 'development') {
 // ROUTES API
 // =============================================================================
 var router = express.Router();
-/*
-router.get('/', function(req, res) {
-  res.json({ message: 'hooray! welcome to our api!' });   
-});
-*/
+
 /**
  * GET /api - report basic details about the API
  * GET /api/v1
@@ -57,7 +54,7 @@ router.get('/v1', function(req, res) {
  * @param source string
  *   &source=niche : Unique name to identify the source of the import data.
  */
-router.get('/api/v1/imports', function(req, res) {
+router.post('/v1/imports', function(req, res) {
   if (req.query.type === undefined ||
       req.query.exists === undefined ||
       req.query.source === undefined ||
@@ -90,8 +87,30 @@ router.get('/api/v1/imports', function(req, res) {
     }
     else {
       console.log('POST /api/v1/imports request. Invalid source: ' + req.query.source);
-      dslogger.error('POST /api/v1/imports request. Invalid source: ' + req.query.source);
     }
+  }
+});
+
+/**
+ * POST to /api/v1/imports/summaries
+ *
+ * @param type string
+ *   ex. &type=user : The type of import.
+ *
+ * @param source string
+ *   &source=niche.com : Unique name to identify the source of the import data.
+ */
+router.post('/v1/imports/summaries', function(req, res) {
+  if (req.query.type === undefined ||
+      req.query.source === undefined ||
+      req.body.target_CSV_file === undefined ||
+      req.body.signup_count === undefined ||
+      req.body.skipped === undefined) {
+    res.send(400, 'POST /api/v1/imports/summaries request. Type or source not specified or no target CSV file, signup count and skipped values specified.');
+  }
+  else {
+    var userImportSummary = new UserImportSummary(importSummaryModel);
+    userImportSummary.post(req, res);
   }
 });
 
