@@ -1,24 +1,42 @@
-var express    = require('express');
-var mongoose   = require('mongoose');
-var bodyParser = require('body-parser');
-var morgan     = require('morgan');
+var express           = require('express');
+var mongoose          = require('mongoose');
+var bodyParser        = require('body-parser');
+var FileStreamRotator = require('file-stream-rotator');
+var fs                = require('fs');
+var morgan            = require('morgan');
+
 
 var UserImport = require('./lib/user-import');
 var UserImportSummary = require('./lib/user-import-summary');
-var UserVote = require('./lib/user-vote');
+var UserActivity = require('./lib/user-activity');
 
 var mb_config = require(__dirname + '/config/mb_config.json');
+var logDirectory = __dirname + '/logs';
+
+
 
 /**
  * Express Setup
  */
 var app = express();
 
-// configure app to use bodyParser()
-// this will let us get the data from a POST
+// ensure log directory exists
+fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
+
+// var accessLogStream = fs.createWriteStream(__dirname + '/access.log',{flags: 'a'});
+
+// create a rotating write stream
+var accessLogStream = FileStreamRotator.getStream({
+  filename: logDirectory + '/access-%DATE%.log',
+  frequency: 'daily',
+  verbose: false
+});
+
+// configure app to use bodyParser() to get the data from a POST
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+// Toggle tools and logging based on enviroment setting
 if (app.get('env') == 'development') {
   // To output objects for debugging
   // console.log("/ request: " + util.inspect(request, false, null));
@@ -28,7 +46,7 @@ if (app.get('env') == 'development') {
 else if (app.get('env') == 'production') {
   app.use(morgan('common', {
     skip: function(req, res) { return res.statusCode < 400 },
-    stream: __dirname + '/logs/morgan.log'
+    stream: accessLogStream
   }));
 }
 
@@ -122,15 +140,16 @@ router.post('/v1/imports/summaries', function(req, res) {
 });
 
 /**
- * POST to /v1/user/vote
+ * POST to /v1/user/activity
  */
 app.post('/v1/user/activity', function(req, res) {
-  if (req.body.activity == 'vote') {
-    var userVote = new UserVote(externalApplicationUserEventModel);
+
+  if (req.body.type == 'vote') {
+    var UserActivity = new UserActivity(UserActivityModel);
     userVote.post(req, res);
   }
   else {
-    console.log("Unsupported activity: " + req.body.activity);
+    console.log("Unsupported activity: " + req.body.type);
   }
 
 });
@@ -170,14 +189,18 @@ var userImportCollectionName_Niche = 'userimport-niche';
 var userImportCollectionName_HerCampus = 'userimport-hercampus';
 var userImportCollectionName_ATT_iChannel = 'userimport-att-ichannel';
 var userImportCollectionName_TeenLife = 'userimport-teenlife';
+
 var importSummaryModel;
 var importSummaryCollectionName = 'import-summary';
 
-var externalApplicationUserEventModel;
-var externalApplicationUserEventCollectionName = 'externalapplicationuserevent';
+var userActivityModel;
+var userActivityCollectionName = 'user-activity';
 
+// Connection to Mongo event
 mongoose.connection.once('open', function() {
 
+  // userImport
+  //
   // User import logging schema for existing entries
   var userImportLoggingSchema = new mongoose.Schema({
     logged_date : { type: Date, default: Date.now },
@@ -208,14 +231,15 @@ mongoose.connection.once('open', function() {
   });
   userImportLoggingSchema.set('autoIndex', false);
 
-  // Logging model
   userImportModel_niche = mongoose.model(userImportCollectionName_Niche, userImportLoggingSchema);
   userImportModel_hercampus = mongoose.model(userImportCollectionName_HerCampus, userImportLoggingSchema);
   userImportModel_att_ichannel = mongoose.model(userImportCollectionName_ATT_iChannel, userImportLoggingSchema);
   userImportModel_teenlife = mongoose.model(userImportCollectionName_TeenLife, userImportLoggingSchema);
 
+  // importSummary
+  //
   // User import logging schema for summary reports
-  var importSummarySchema = new mongoose.Schema({
+  var importSummaryLoggingSchema = new mongoose.Schema({
     logged_date : { type: Date, default: Date.now },
     target_CSV_file : { type : String, trim : true },
     signup_count : { type : Number },
@@ -233,13 +257,15 @@ mongoose.connection.once('open', function() {
       enum: ['user_import']
     },
   });
-  importSummarySchema.set('autoIndex', false);
+  importSummaryLoggingSchema.set('autoIndex', false);
 
   // Logging summary model
-  importSummaryModel = mongoose.model(importSummaryCollectionName, importSummarySchema);
+  importSummaryModel = mongoose.model(importSummaryCollectionName, importSummaryLoggingSchema);
 
+  // userActivity
+  //
   // External application user event logging schema for "in the future" email list generation
-  var externalApplicationUserEventSchema = new mongoose.Schema({
+  var userActivityLoggingSchema = new mongoose.Schema({
     logged_date : { type: Date, default: Date.now },
     email : { type : String, trim : true },
     source : {
@@ -257,10 +283,10 @@ mongoose.connection.once('open', function() {
     activity_date : { type: Date, default: Date.now },
     activity_details : { type : String }
   });
-  externalApplicationUserEventSchema.set('autoIndex', false);
+  userActivityLoggingSchema.set('autoIndex', false);
 
   // Logging summary model
-  externalApplicationUserEventModel = mongoose.model(externalApplicationUserEventCollectionName, externalApplicationUserEventSchema);
+  userActivityModel = mongoose.model(userActivityCollectionName, userActivityLoggingSchema);
 
   console.log("Connection to Mongo (%s) succeeded! Ready to go...\n\n", mongoUri);
 });
