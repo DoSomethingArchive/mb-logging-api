@@ -3,11 +3,10 @@ var mongoose   = require('mongoose');
 var bodyParser = require('body-parser');
 
 var UserImport = require('./lib/user-import');
-var UserImportSummary = require('./lib/user-import-summary')
+var UserImportSummary = require('./lib/user-import-summary');
+var UserVote = require('./lib/user-vote');
 
 var mb_config = require(__dirname + '/config/mb_config.json');
-var defaultPort = mb_config.default['port'];
-
 
 /**
  * Express Setup
@@ -112,6 +111,14 @@ router.post('/v1/imports/summaries', function(req, res) {
     var userImportSummary = new UserImportSummary(importSummaryModel);
     userImportSummary.post(req, res);
   }
+});
+
+/**
+ * POST to /v1/user/vote
+ */
+app.post('/v1/user/vote', function(req, res) {
+  var userVote = new UserVote(externalApplicationUserEventModel);
+  userVote.post(req, res);
 });
 
 // REGISTER ROUTES
