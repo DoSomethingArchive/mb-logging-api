@@ -7,5 +7,5 @@ config/
 # Libraries
 node_modules/
 
-# Ignore dslogger logs
-dslogger/
+# Ignore logs
+logs/
