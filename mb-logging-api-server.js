@@ -142,11 +142,11 @@ router.post('/v1/imports/summaries', function(req, res) {
 /**
  * POST to /v1/user/activity
  */
-app.post('/v1/user/activity', function(req, res) {
+router.post('/v1/user/activity', function(req, res) {
 
-  if (req.body.type == 'vote') {
-    var UserActivity = new UserActivity(UserActivityModel);
-    userVote.post(req, res);
+  if (req.query.type == 'vote') {
+    var userActivity = new UserActivity(userActivityModel);
+    userActivity.post(req, res);
   }
   else {
     console.log("Unsupported activity: " + req.body.type);
@@ -270,7 +270,6 @@ mongoose.connection.once('open', function() {
     email : { type : String, trim : true },
     source : {
       type : String,
-      lowercase : 0,
       trim : true,
       enum: ['CGG', 'AGG']
     },
@@ -285,7 +284,7 @@ mongoose.connection.once('open', function() {
   });
   userActivityLoggingSchema.set('autoIndex', false);
 
-  // Logging summary model
+  // Log user activity model
   userActivityModel = mongoose.model(userActivityCollectionName, userActivityLoggingSchema);
 
   console.log("Connection to Mongo (%s) succeeded! Ready to go...\n\n", mongoUri);
