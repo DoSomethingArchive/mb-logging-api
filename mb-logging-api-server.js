@@ -5,15 +5,12 @@ var FileStreamRotator = require('file-stream-rotator');
 var fs                = require('fs');
 var morgan            = require('morgan');
 
-
 var UserImport = require('./lib/user-import');
 var UserImportSummary = require('./lib/user-import-summary');
 var UserActivity = require('./lib/user-activity');
 
 var mb_config = require(__dirname + '/config/mb_config.json');
 var logDirectory = __dirname + '/logs';
-
-
 
 /**
  * Express Setup
@@ -41,7 +38,7 @@ if (app.get('env') == 'development') {
   // To output objects for debugging
   // console.log("/ request: " + util.inspect(request, false, null));
   var util = require('util');
-  app.use(morgan('dev'));
+  app.use(morgan('dev', {stream: accessLogStream}));
 }
 else if (app.get('env') == 'production') {
   app.use(morgan('common', {
@@ -144,12 +141,12 @@ router.post('/v1/imports/summaries', function(req, res) {
  */
 router.post('/v1/user/activity', function(req, res) {
 
-  if (req.query.type == 'vote') {
-    var userActivity = new UserActivity(userActivityModel);
-    userActivity.post(req, res);
+  if (req.query.type != 'vote') {
+    res.send(400, 'POST /api/v1/user/activity request. Type not supported activity: ' + req.body.type);
   }
   else {
-    console.log("Unsupported activity: " + req.body.type);
+    var userActivity = new UserActivity(userActivityModel);
+    userActivity.post(req, res);
   }
 
 });
