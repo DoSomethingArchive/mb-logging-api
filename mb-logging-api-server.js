@@ -170,8 +170,13 @@ router.route('/v1/user/activity')
   })
 
   .get(function(req, res) {
-    var userActivity = new UserActivity(userActivityModel);
-    userActivity.get(req, res);
+    if (req.query.type === undefined && req.query.source === undefined) {
+      res.send(400, 'GET /api/v1/user/activity request, type and/or source not defined. ');
+    }
+    else {
+      var userActivity = new UserActivity(userActivityModel);
+      userActivity.get(req, res);
+    }
   });
 
 
