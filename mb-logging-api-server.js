@@ -47,7 +47,7 @@ else if (app.get('env') == 'production') {
   }));
 }
 
-// ROUTES API
+// DEFINE ROUTES
 // =============================================================================
 var router = express.Router();
 
@@ -138,18 +138,47 @@ router.post('/v1/imports/summaries', function(req, res) {
 
 /**
  * POST to /v1/user/activity
+ *   Required parameter:
+ *     - type: The type of activity to log. Currently only "vote" is supported.
+ *
+ *   POST values:
+ *     - email
+ *     - source
+ *     - activity
+ *
+ * GET to /v1/user/activity
+ *   Optional parameters:
+ *     - type: The type of activity log.
+ *     - source: What application produced the log entry.
+ *     - offset: The time (in seconds) to offset from the current time.
+ *     - interval: The length of time from the offset to request a group of log
+ *         entries.
+ *
+ *     If none of the optional parameters are applied the request will return
+ *     all of the existing log entries.
  */
-router.post('/v1/user/activity', function(req, res) {
+router.route('/v1/user/activity')
 
-  if (req.query.type != 'vote') {
-    res.send(400, 'POST /api/v1/user/activity request. Type not supported activity: ' + req.body.type);
-  }
-  else {
-    var userActivity = new UserActivity(userActivityModel);
-    userActivity.post(req, res);
-  }
+  .post(function(req, res) {
+    if (req.query.type != 'vote') {
+      res.send(400, 'POST /api/v1/user/activity request. Type not supported activity: ' + req.body.type);
+    }
+    else {
+      var userActivity = new UserActivity(userActivityModel);
+      userActivity.post(req, res);
+    }
+  })
 
-});
+  .get(function(req, res) {
+    if (req.query.type === undefined && req.query.source === undefined) {
+      res.send(400, 'GET /api/v1/user/activity request, type and/or source not defined. ');
+    }
+    else {
+      var userActivity = new UserActivity(userActivityModel);
+      userActivity.get(req, res);
+    }
+  });
+
 
 // REGISTER ROUTES
 // =============================================================================
