@@ -9,7 +9,7 @@ An API to send logging data for persistant storage. Currently the persistant sto
 
 * GET /api - report basic details about the API
 * GET /api/v1
-* POST to /api/v1/imports?type=[user]&exists=[1]&source=[niche]
+* POST to /api/v1/imports?type=[user]&exists=[1]&source=[ niche | niche.com | hercampus | att-ichannel | teenlife ]
   * @param type string
     ex. &type=user : The type of import, helps to define what collection the
      POST is added to.
@@ -18,12 +18,33 @@ An API to send logging data for persistant storage. Currently the persistant sto
     Commons users in the userImportModel.
   * @param source string
     &source=niche : Unique name to identify the source of the import data.
-* POST to /api/v1/imports/summaries?type=[user]&source=[niche]
-   * @param type string
+* POST to /api/v1/imports/summaries?type=[user]&source=[ niche | niche.com | hercampus | att-ichannel | teenlife ]
+  * @param type string
      ex. &type=user : The type of import.
-   * @param source string
+  * @param source string
      &source=niche.com : Unique name to identify the source of the import data.
+* GET to /v1/user/activity?type=[ vote ]&source=[ AGG ]
+  * @param type string
+  * @param source string
+* POST to /v1/user/activity?type=[ vote ]
+  * @param type string
+  * POST:
+    * email string  (required)
+    * source string
+    * activity_details seralized String
+    * activity_date  Date
 
+##### Environment
+```
+$ export NODE_ENV=<production | development>
+```
+- **`production`**:
+  - Use production Mongo database connection settings defined in config/mb_config.json.
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/DoSomething/mb-logging-api/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+- **`development`**:
+  - Use development Mongo database connection settings defined in config/mb_config.json.
 
+##### Start as Deamon
+```
+$ NODE_ENV=<production | development> forever start mb-logging-api-server.js
+```
