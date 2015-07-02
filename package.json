@@ -1,6 +1,6 @@
 {
   "name": "mb-logging-api",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Logging API for Message Broker use.",
   "homepage" : "https://github.com/DoSomething/mb-logging-api",
   "author": "Darren Lee <dlee@dosomething.org>",
@@ -19,7 +19,7 @@
     "url": "https://github.com/DoSomething/mb-logging-api/issues"
   },
   "engines" : {
-    "node" : ">=0.12.2"
+    "node" : ">=0.12.5"
   },
   "keywords": [
     "DoSomething.org",
@@ -33,6 +33,9 @@
     "body-parser": "~1.0.1",
     "morgan": "~1.6.0",
     "file-stream-rotator": "~0.0.6"
+  },
+  "scripts": {
+    "postinstall" : "node -e \"var srcpath='../lib'; var dstpath='node_modules/lib';var fs=require('fs'); fs.exists(dstpath,function(exists){if(!exists){fs.symlinkSync(srcpath, dstpath,'dir');}});\""
   },
   "license": "MIT"
 }
