@@ -1,12 +1,26 @@
+/**
+ * Application routes module. Routes define which objects to instantiate as
+ * a result.
+ */
 
 module.exports = (function() {
 
-  var router = require('express').Router();
-  
+  var express = require('express');
+  var app = express();
+
+  var router = express.Router();
+  var model = require('model/model');
+
   var UserImport = require('lib/user-import');
   var UserImportSummary = require('lib/user-import-summary');
   var UserActivity = require('lib/user-activity');
-  
+
+  if (app.get('env') == 'development') {
+    // To output objects for debugging
+    // console.log("/process request: " + util.inspect(request, false, null));
+    var util = require('util');
+  }
+
   /**
    * GET /api - report basic details about the API
    * GET /api/v1
@@ -17,7 +31,7 @@ module.exports = (function() {
   router.get('/v1', function(req, res) {
     res.send(200, 'Message Broker Logging API (mb-logging-api). Version 1.x.x, see wiki (https://github.com/DoSomething/mb-logging-api/wiki) for documentation');
   });
-  
+
   /**
    * POST to /api/v1/imports
    *
@@ -48,19 +62,19 @@ module.exports = (function() {
   
       // Use model based on source
       if (req.query.source.toLowerCase() === 'niche') {
-        var userImport = new UserImport(userImportModel_niche);
+        var userImport = new UserImport(model.userImportModel_niche);
         userImport.post(req, res);
       }
       else if (req.query.source.toLowerCase() === 'hercampus') {
-        var userImport = new UserImport(userImportModel_hercampus);
+        var userImport = new UserImport(model.userImportModel_hercampus);
         userImport.post(req, res);
       }
       else if (req.query.source.toLowerCase() === 'att-ichannel') {
-        var userImport = new UserImport(userImportModel_att_ichannel);
+        var userImport = new UserImport(model.userImportModel_att_ichannel);
         userImport.post(req, res);
       }
       else if (req.query.source.toLowerCase() === 'teenlife') {
-        var userImport = new UserImport(userImportModel_teenlife);
+        var userImport = new UserImport(model.userImportModel_teenlife);
         userImport.post(req, res);
       }
       else {
@@ -87,7 +101,7 @@ module.exports = (function() {
       res.send(400, 'POST /api/v1/imports/summaries request. Type or source not specified or no target CSV file, signup count and skipped values specified.');
     }
     else {
-      var userImportSummary = new UserImportSummary(importSummaryModel);
+      var userImportSummary = new UserImportSummary(model.importSummaryModel);
       userImportSummary.post(req, res);
     }
   });
@@ -120,7 +134,7 @@ module.exports = (function() {
         res.send(400, 'POST /api/v1/user/activity request. Type not supported activity: ' + req.body.type);
       }
       else {
-        var userActivity = new UserActivity(userActivityModel);
+        var userActivity = new UserActivity(model.userActivityModel);
         userActivity.post(req, res);
       }
     })
@@ -130,7 +144,7 @@ module.exports = (function() {
         res.send(400, 'GET /api/v1/user/activity request, type and/or source not defined. ');
       }
       else {
-        var userActivity = new UserActivity(userActivityModel);
+        var userActivity = new UserActivity(model.userActivityModel);
         userActivity.get(req, res);
       }
     });
