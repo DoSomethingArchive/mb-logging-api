@@ -35,7 +35,7 @@
     "file-stream-rotator": "~0.0.6"
   },
   "scripts": {
-    "postinstall" : "node -e \"var srcpath='../lib'; var dstpath='node_modules/lib';var fs=require('fs'); fs.exists(dstpath,function(exists){if(!exists){fs.symlinkSync(srcpath, dstpath,'dir');}});\""
+    "postinstall" : "node -e \"var modelpath='../model'; var dstmodelpath='node_modules/model'; var srcpath='../lib'; var dstsrcpath='node_modules/lib'; var cfgpath='../config'; var dstcfgpath='node_modules/config'; var fs=require('fs'); fs.exists(dstmodelpath,function(modelexists){if(!modelexists){fs.symlinkSync(modelpath, dstmodelpath,'dir');}});fs.exists(dstsrcpath,function(srcexists){if(!srcexists){fs.symlinkSync(srcpath, dstsrcpath,'dir');}});fs.exists(dstcfgpath,function(cfgexists){if(!cfgexists){fs.symlinkSync(cfgpath, dstcfgpath,'dir');}});\""
   },
   "license": "MIT"
 }
