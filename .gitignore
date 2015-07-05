@@ -8,4 +8,5 @@ config/
 node_modules/
 
 # Ignore logs
+npm-debug.log
 logs/
